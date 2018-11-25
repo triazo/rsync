@@ -257,8 +257,12 @@ static ERL_NIF_TERM do_job(ErlNifEnv* env, int argc,
     state->out_size += block_size - buf.avail_out;
     if (res == RS_BLOCKED) {
       if (buf.avail_in > 0) {
+        // memmove is used here because buf.next_in and state->in buffers can
+        // overlap with one another
+	memmove(state->in, buf.next_in, buf.avail_in);
+        // perform the realloc after memmove because realloc can invalidate the
+        // memory pointed to by state->in
 	state->in = realloc(state->in, buf.avail_in);
-	memcpy(state->in, buf.next_in, buf.avail_in);
       }
       if (!is_eof)
 	return mk_output(env, state);
