@@ -1,6 +1,6 @@
 @author Evgeniy Khramtsov <ekhramtsov@process-one.net>
-@version @PACKAGE_VERSION@
-@title @PACKAGE_NAME@
+@version 1.0.0
+@title Erlang librsync wrapper
 @doc
 rsync is an Erlang wrapper for
 <a href="http://librsync.sourcefrog.net">librsync</a> library.

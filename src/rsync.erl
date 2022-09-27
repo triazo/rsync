@@ -14,7 +14,7 @@
 %%%-------------------------------------------------------------------
 -module(rsync).
 
--on_load(load_nif/0).
+-on_load(init/0).
 
 %% API
 -export([sig_init/0, sig_update/2, sig_final/1,
@@ -22,9 +22,12 @@
 	 delta_init/1, delta_update/2, delta_final/1,
 	 patch_init/1, patch_update/2, patch_final/1,
 	 load_nif/0, format_error/1, sig/1, delta/2, patch/2,
-	 sig/2, delta/3, patch/3]).
+	 sig/2, delta/3, patch/3, repeat/2]).
 
 -define(BLOCKSIZE, 1 bsl 16). %% 64kb
+
+-define(APPNAME, rsync).
+-define(LIBNAME, rsync).
 
 -type rsync_error_reason() :: done | blocked | running | test_skipped |
 			      io_error | syntax_error | mem_error |
@@ -241,7 +244,7 @@ patch_init(_Data) ->
 
 -spec patch_update(context(), iodata()) -> {ok, binary()} | error().
 %% @doc Proceeds patch creation with addition from `Data'.
-%% `Context' should be previously created using `patch_init/1'. 
+%% `Context' should be previously created using `patch_init/1'.
 %% @see patch_init/1.
 patch_update(Context, Data) ->
     job_iter(Context, Data).
@@ -262,10 +265,6 @@ format_error(Reason) ->
 	Txt ->
 	    Txt
     end.
-
-%% @private
-load_nif() ->
-    load_nif(get_so_path()).
 
 %%%===================================================================
 %%% Internal functions
@@ -335,13 +334,27 @@ get_so_path() ->
     AppDir = filename:dirname(EbinDir),
     filename:join([AppDir, "priv", "lib"]).
 
-load_nif(LibDir) ->
-    SOPath = filename:join(LibDir, ?MODULE),
-    case catch erlang:load_nif(SOPath, 0) of
-        ok ->
-            ok;
-        Err ->
-            error_logger:warning_msg("unable to load ~p NIF: ~p~n",
-				     [?MODULE, Err]),
-            Err
-    end.
+
+%%%===================================================================
+%%% NIF utility
+%%%===================================================================
+
+repeat(_, _) ->
+    not_loaded(?LINE).
+
+init() ->
+    SoName = case code:priv_dir(?APPNAME) of
+        {error, bad_name} ->
+            case filelib:is_dir(filename:join(["..", priv])) of
+                true ->
+                    filename:join(["..", priv, ?LIBNAME]);
+                _ ->
+                    filename:join([priv, ?LIBNAME])
+            end;
+        Dir ->
+            filename:join(Dir, ?LIBNAME)
+    end,
+    erlang:load_nif(SoName, 0).
+
+not_loaded(Line) ->
+    erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).

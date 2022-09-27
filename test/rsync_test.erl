@@ -12,7 +12,7 @@
 
 test_dir() ->
     {ok, Cwd} = file:get_cwd(),
-    filename:join(filename:dirname(Cwd), "test").
+    filename:join(Cwd, "test").
 
 tmp_dir() ->
     {ok, Cwd} = file:get_cwd(),

@@ -77,7 +77,7 @@ static rs_result read_callback(state_t *state, rs_long_t pos, size_t *len, void 
   ErlNifBinary bin = state->bin;
   if (pos >= bin.size)
     return RS_INPUT_ENDED;
-  
+
   if (pos + *len > bin.size)
     *len = bin.size - pos;
 
@@ -163,13 +163,13 @@ static ERL_NIF_TERM delta_init(ErlNifEnv* env, int argc,
 {
   state_t *state = NULL;
   rs_result res;
-  
+
   if (!enif_get_resource(env, argv[0], state_r, (void *) &state))
     return enif_make_badarg(env);
 
   if (state->type != LOADSIG)
     return enif_make_badarg(env);
-  
+
   res = rs_build_hash_table(state->sig);
   if (res != RS_DONE)
     return mk_error(env, res);
@@ -200,7 +200,7 @@ static ERL_NIF_TERM patch_init(ErlNifEnv* env, int argc,
 static ERL_NIF_TERM mk_output(ErlNifEnv* env, state_t *state)
 {
   ErlNifBinary output;
-  
+
   if (state->type == LOADSIG) {
     return enif_make_atom(env, "ok");
   } else {
@@ -221,7 +221,7 @@ static ERL_NIF_TERM do_job(ErlNifEnv* env, int argc,
   size_t input_size;
   char *input_data;
   rs_result res;
-    
+
   if (!enif_get_resource(env, argv[0], state_r, (void *) &state))
     return enif_make_badarg(env);
 
