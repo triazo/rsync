@@ -21,7 +21,7 @@
 	 loadsig_init/0, loadsig_update/2, loadsig_final/1,
 	 delta_init/1, delta_update/2, delta_final/1,
 	 patch_init/1, patch_update/2, patch_final/1,
-	 load_nif/0, format_error/1, sig/1, delta/2, patch/2,
+	 format_error/1, sig/1, delta/2, patch/2,
 	 sig/2, delta/3, patch/3, repeat/2]).
 
 -define(BLOCKSIZE, 1 bsl 16). %% 64kb
@@ -328,11 +328,6 @@ write(Fd, Data) ->
 
 file_opts() ->
     [raw, binary, {read_ahead, ?BLOCKSIZE}].
-
-get_so_path() ->
-    EbinDir = filename:dirname(code:which(?MODULE)),
-    AppDir = filename:dirname(EbinDir),
-    filename:join([AppDir, "priv", "lib"]).
 
 
 %%%===================================================================
